@@ -1,0 +1,42 @@
+---
+title: "Bogenschnitt"
+author: "Oliver Fritz"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Aufgabenstellung
+
+```{r gegeben}
+
+# Hier die Parameter des Bogenschnitts einfügen/anpassen:
+
+P1 <- c(755.107, 97.938)
+P2 <- c(797.017, 111.965)
+s1 <- 50.898
+s2 <- 51.929
+
+orientation <- "geodetic" # Alternativ: "geodetic" | "cartesian"
+position <- "right" # Alternativen: "left" | "right" | NULL
+```
+
+Gegeben seien die *`r if(orientation=="geodetic") "geodätischen" else if(orientation=="cartesian") "kartesischen" else "?"`* Koordinaten der Punkte $P_1=\binom{`r P1[1]`}{`r P1[2]`}$ und $P_2=\binom{`r P2[1]`}{`r P2[2]`}$ sowie die Strecken $s_1=`r s1`$ und $s_2=`r s2`$. Man bestimme die Koordinaten für den Punkt $P_3$`r if(position=="left") ", welcher links" else if(position=="right") ", welcher rechts" else ", welcher links oder rechts"` von $\overline{P_1P_2}$ liegt!
+
+## Lösung
+```{r requirements, message=FALSE, warning=FALSE}
+require(tidyverse)
+source("MatheGIS.R")
+```
+
+### Graphische Darstellung
+
+```{r plot}
+plot_bogenschnitt(P1=P1, P2=P2, s1=s1, s2=s2, orientation=orientation)
+```
+
+## 
+
+
