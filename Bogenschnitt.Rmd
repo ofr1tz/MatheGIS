@@ -25,18 +25,58 @@ position <- "right" # Alternativen: "left" | "right" | NULL
 
 Gegeben seien die *`r if(orientation=="geodetic") "geodätischen" else if(orientation=="cartesian") "kartesischen" else "?"`* Koordinaten der Punkte $P_1=\binom{`r P1[1]`}{`r P1[2]`}$ und $P_2=\binom{`r P2[1]`}{`r P2[2]`}$ sowie die Strecken $s_1=`r s1`$ und $s_2=`r s2`$. Man bestimme die Koordinaten für den Punkt $P_3$`r if(position=="left") ", welcher links" else if(position=="right") ", welcher rechts" else ", welcher links oder rechts"` von $\overline{P_1P_2}$ liegt!
 
-## Lösung
+## Benötigte Erweiterungen
 ```{r requirements, message=FALSE, warning=FALSE}
 require(tidyverse)
 source("MatheGIS.R")
 ```
 
-### Graphische Darstellung
+## Graphische Darstellung
 
 ```{r plot}
 plot_bogenschnitt(P1=P1, P2=P2, s1=s1, s2=s2, orientation=orientation)
 ```
 
-## 
+## Lösung
 
+### Berechnung
+
+Die Lösung des Bogenschnitts mittels orientierter Wegbeschreibung hat folgende Form:
+$$P_3=P_1+\frac{p}{s_3}(P_2-P_1)\pm\frac{h}{s_3}(P_2-P_1)^{\circ}$$
+
+### Beschreibung
+
+Ausgehend von $P_1$ bewegt man sich auf der mit dem Streckenparameter $t=\frac{p}{s_3}$ multiplizierten Strecke $\overline{P_1P_2}$. Ist $t<0$, bewegt man sich dabei von $P_2$ fort, anosnsten aber auf $P_2$ zu. Ist $0<t<1$, so endet der Weg zwischen $P_1$ und $P_2$. Bei $t>1$, d.h. $p>s_3$ geht der Weg über $P_2$ hinaus. Die Strecke $s_3$ ist die dem Punkt $P_3$ gegenüberliegende Seite in dem aus $P_1$, $P_2$ und $P_3$ gebildeten Dreieck , also die Strecke $\overline{P_1P_2}$. Nach Zurücklegen dieses ersten Wegabschnitts erreicht man den Lotfußpunkt $P_L$.
+
+Im zweiten Schritt bewegt man sich weiter auf dem mit dem Streckenparameter $u=\frac{h}{s_3}$ multiplizierten orientierten Normalenvektor $(P_2-P_1)^{\circ}$. Der orientierte Normalenvektor steht im Drehsin des Koordinatensystems orthogonal zum Richtungsvektor (Drehsinn geodätisch: mit dem Uhrzeigersinn, kartesisch: entgegengesetzt). Das Plusminus-Vorzeichen lässt dabei ein Abbiegen sowohl nach links oder rechts zu. Die Position des Punktes $P_3$ links oder rechts der Strecke $\overline{P_1P_2}$ erschließt sich nicht aus den gegebenen beiden Punkten und Streckenlängen.
+
+### Bestimmung von $s_3^2$
+Zunächst berechnen wir das Quadrat der Strecke $s_3$ aus den Koordinaten der Punkte $P_1$ und $P_2$:
+```{r s3quadrat}
+s3quadrat <- streckenquadrat(P1, P2)
+```
+
+$$\begin{equation}
+\begin{split}
+s_3^2&=(x_2-x_1)^2+(y_2-y_1)^2\\\\
+&=(`r P2[1]`-`r P1[1]`)^2+(`r P2[2]`-`r P1[2]`)^2\\\\
+&\approx`r format(round(s3quadrat,4), big.mark=",")`
+\end{split}
+\end{equation}$$
+
+### Bestimmung des ersten Streckenparameters t
+
+Der Streckenparameter $t=\frac{p}{s_3}$ kann als Funktion von $s_1$, $s_2$ und $s_3^2$ ermittelt werden.
+
+```{r param_ps3}
+t <- param_ps3(s1, s2, s3quadrat)
+```
+
+$$\begin{equation}
+\begin{split}
+\frac{p}{s_3}&=\frac{1}{2}(1+\frac{s_2^2}{s_3^2}-{s_1^2}{s_3^2})\\\\
+&\approx\frac{1}{2}(1+\frac{`r format(round(s2^2,4), big.mark=",")`}{`r format(round(s3quadrat,4), big.mark=",")`}-\frac{`r format(round(s1^2,4), big.mark=",")`}{`r format(round(s3quadrat,4), big.mark=",")`})\\\\
+&\approx`r format(round(t,4), big.mark=",")`
+\end{split}
+\end{equation}$$
 

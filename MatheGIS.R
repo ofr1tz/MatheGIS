@@ -1,14 +1,14 @@
-## Prerequisites
+# Vorbedingungen
 
-# Install tidyverse package if necessary
+## Installiert Tidyverse falls nötig
 if (!require(tidyverse)) {
       install.packages("tidyverse")
       library(tidyverse)
 }
 
-## General Auxiliary functions
+# Hilfsfunktionen
 
-# Konvertiert Grad oder Neugrad in Radiant
+## Konvertiert Grad oder Neugrad in Radiant
 in_radiant <- function(
       angle=0,
       angle_unit) {
@@ -19,14 +19,14 @@ in_radiant <- function(
       rad
 }
 
-# Bestimmt den orientierten Normalenvektor (onv) aus einem directionalVector
-# Der onv steht im Drehsin des Koordinatensystems orthogonal zum directionalVector
-# Drehsinn geodaetisch -> mit dem Uhrzeigersinn, kartesisch -> gegen die Uhr
+## Bestimmt den orientierten Normalenvektor (onv) aus einem directionalVector
+## Der onv steht im Drehsin des Koordinatensystems orthogonal zum directionalVector
+## Drehsinn geodaetisch -> mit dem Uhrzeigersinn, kartesisch -> gegen die Uhr
 onv <- function(directionalVector=c(0,0)) {
       c(-directionalVector[2], directionalVector[1])
 }
 
-# Berechnet die Laenge der Strecke zwischen zwei gegebenen Punkten P1 und P2
+## Berechnet die Laenge der Strecke zwischen zwei gegebenen Punkten P1 und P2
 strecke <- function(
       P1=c(0,0),
       P2=c(0,0)) {
@@ -34,7 +34,7 @@ strecke <- function(
       sqrt(streckenquadrat(P1, P2))
 }
 
-# Berechnet das Quadrat der Strecke zwischen zwei gegebenen Punkten P1 und P2
+## Berechnet das Quadrat der Strecke zwischen zwei gegebenen Punkten P1 und P2
 streckenquadrat <- function(
       P1=c(0,0),
       P2=c(0,0)) {
@@ -42,30 +42,30 @@ streckenquadrat <- function(
       (P2[1]-P1[1])^2+(P2[2]-P1[2])^2
 }
 
-# Berechnet den Streckenparameter t (p/s3) als Funktion von s1, s2, und s3^2
+## Berechnet den Streckenparameter t (p/s3) als Funktion von s1, s2, und s3^2
 param_ps3 <- function(s1, s2, s3square) {
     0.5*(1+(s2^2/s3square)-(s1^2/s3square))
 }
 
-# Berechnet den Streckenparameter u (h/s3) als Funktion von s1, s2, s3^2 und p/s3
+## Berechnet den Streckenparameter u (h/s3) als Funktion von s1, s2, s3^2 und p/s3
 param_hs3 <- function(s1, s2, s3square, ps3) {
     sqrt((s2^2/s3square)-ps3^2)
 }
 
-# Berechnet den Lotfusspunkt von P3 als Funktion von P1, P2, s1 und s2
+## Berechnet den Lotfusspunkt von P3 als Funktion von P1, P2, s1 und s2
 lotfuss <- function(P1, P2, s1, s2) {
     P1+param_ps3(s1, s2, streckenquadrat(P1, P2))*(P2-P1)
 }
 
 
-## Schnittverhalten (3.3)
+# Schnittverhalten (3.3)
 
 
-## Solving geodetic problems with oriented path decriptions (3.5)
+## Lösung geodätischer Probleme mithilfe orientierter Wegbeschreibung (3.5)
 
-# Polaraufnahme
-# Die Punkte P1 und P2 bekannt, die Strecke s2 und der Winkel alpha1 sind gemessen.
-# Gesucht ist der Punkt P3.
+### Polaraufnahme
+### Die Punkte P1 und P2 bekannt, die Strecke s2 und der Winkel alpha1 sind gemessen.
+### Gesucht ist der Punkt P3.
 polaraufnahme <- function(
       P1=c(0,0),
       P2=c(0,0),
@@ -86,7 +86,7 @@ polaraufnahme <- function(
             
             if(alpha1<0 | alpha1>max_angle) stop("Invalid angle value provided.")
             
-            ## Andersrum, wenn kartesisch?
+            # Andersrum, wenn kartesisch?
             if(alpha1<max_angle*.25 | alpha1>max_angle*.75) output$P3_direction <- "in front of P1 relative to P1P2"
             if(alpha1<max_angle*.25 | alpha1>max_angle*.75) output$P3_direction <- "behind P1 relative to P1P2"
             if(alpha1<max_angle*.5) output$P3_position <- "right"
@@ -106,14 +106,14 @@ polaraufnahme <- function(
 }
 
 
-# Vorwaertsschnitt
-# Die Punkte P1 und P2 bekannt, die Winkel alpha1 und alpha2 sind gemessen.
-# Gesucht ist der Punkt P3.
+### Vorwaertsschnitt
+### Die Punkte P1 und P2 bekannt, die Winkel alpha1 und alpha2 sind gemessen.
+### Gesucht ist der Punkt P3.
 
 
-# Bogenschnitt
-# Die Punkte P1 und P2 bekannt, die Strecken s1 und s2 sind gemessen.
-# Gesucht ist der Punkt P3.
+### Bogenschnitt
+### Die Punkte P1 und P2 bekannt, die Strecken s1 und s2 sind gemessen.
+### Gesucht ist der Punkt P3.
 
 
 
@@ -134,7 +134,7 @@ bogenschnitt_P3 <- function(P1, P2, s1, s2, orientation, position) {
 }
 
 
-# Returns a complete analysis of the bogenschnitt
+# Returns a complete analysis of the bogenschnitt (-> RMarkdown document)
 report_bogenschnitt <- function(
       P1=c(0,0),
       P2=c(0,0),
@@ -171,7 +171,7 @@ report_bogenschnitt <- function(
       
 }
 
-# Visualisiert den Bogenschnitt
+### Visualisiert den Bogenschnitt
 plot_bogenschnitt <- function(
     P1=c(0,0),
     P2=c(0,0),
@@ -188,8 +188,8 @@ plot_bogenschnitt <- function(
         ~point, ~x, ~y, 
         "P1", P1[1], P1[2], 
         "P2", P2[1], P2[2], 
-        "P3_left", P3_left[1], P3_left[2], 
-        "P3_right", P3_right[1], P3_right[2])
+        "P3 links", P3_left[1], P3_left[2], 
+        "P3 rechts", P3_right[1], P3_right[2])
     nudge_x <- (range(dat["x"])[2]-range(dat["x"])[1])/20
     PL <- lotfuss(P1, P2, s1, s2)
     
