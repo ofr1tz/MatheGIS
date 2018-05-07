@@ -48,7 +48,7 @@ param_ps3 <- function(s1, s2, s3square) {
 }
 
 ## Berechnet den Streckenparameter u (h/s3) als Funktion von s1, s2, s3^2 und p/s3
-param_hs3 <- function(s1, s2, s3square, ps3) {
+param_hs3 <- function(s2, s3square, ps3) {
     sqrt((s2^2/s3square)-ps3^2)
 }
 
@@ -115,20 +115,17 @@ polaraufnahme <- function(
 ### Die Punkte P1 und P2 bekannt, die Strecken s1 und s2 sind gemessen.
 ### Gesucht ist der Punkt P3.
 
-
-
-
-
 # Berechnet den Punkt P3 aus P1, P2, s1 und s2
 bogenschnitt_P3 <- function(P1, P2, s1, s2, orientation, position) {
-    if (position=="right" & orientation=="geodetic" |
-        position=="left" & orientation=="cartesian") sign <- 1
-    if (position=="left" & orientation=="geodetic" |
-        position=="right" & orientation=="cartesian") sign <- -1
-        
+    if (position=="right" & orientation=="geodetic" | position=="left" & orientation=="cartesian") {
+        sign <- 1
+    } else if (position=="left" & orientation=="geodetic" | position=="right" & orientation=="cartesian") {
+        sign <- -1
+    } else stop("Invalid position or orientation.")
+
     s3square <- streckenquadrat(P1, P2)
     t <- param_ps3(s1, s2, s3square)
-    u <- param_hs3(s1, s2, s3square, t)
+    u <- param_hs3(s2, s3square, t)
     
     P1+t*(P2-P1)+sign*u*onv(P2-P1)
 }
@@ -148,7 +145,7 @@ report_bogenschnitt <- function(
       output <- list()
       output$s3square <- streckenquadrat(P1, P2)
       output$p_divided_by_s3 <- param_ps3(s1, s2, output$s3square)
-      output$h_divided_by_s3 <- param_hs3(s1, s2, output$s3square, output$p_divided_by_s3)
+      output$h_divided_by_s3 <- param_hs3(s2, output$s3square, output$p_divided_by_s3)
       output$directionalVector_P2P1 <- P2-P1
       output$orientedNormalVector_P2P1 <- onv(output$directionalVector_P2P1)
       output$P3_right <- bogenschnitt_P3(P1, P2, s1, s2, orientation=orientation, position="right")

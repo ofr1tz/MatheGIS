@@ -134,7 +134,7 @@ s1 &lt;- 50.898
 s2 &lt;- 51.929
 
 orientation &lt;- &quot;geodetic&quot; # Alternativ: &quot;geodetic&quot; | &quot;cartesian&quot;
-position &lt;- &quot;right&quot; # Alternativen: &quot;left&quot; | &quot;right&quot; | NULL</code></pre>
+position &lt;- &quot;right&quot; # Alternativen: &quot;left&quot; | &quot;right&quot;</code></pre>
 <p>Gegeben seien die <em>geodätischen</em> Koordinaten der Punkte <span class="math inline">\(P_1=\binom{755.107}{97.938}\)</span> und <span class="math inline">\(P_2=\binom{797.017}{111.965}\)</span> sowie die Strecken <span class="math inline">\(s_1=50.898\)</span> und <span class="math inline">\(s_2=51.929\)</span>. Man bestimme die Koordinaten für den Punkt <span class="math inline">\(P_3\)</span>, welcher rechts von <span class="math inline">\(\overline{P_1P_2}\)</span> liegt!</p>
 </div>
 <div id="benotigte-erweiterungen" class="section level2">
@@ -155,7 +155,7 @@ source(&quot;MatheGIS.R&quot;)</code></pre>
 </div>
 <div id="beschreibung" class="section level3">
 <h3>Beschreibung</h3>
-<p>Ausgehend von <span class="math inline">\(P_1\)</span> bewegt man sich auf der mit dem Streckenparameter <span class="math inline">\(t=\frac{p}{s_3}\)</span> multiplizierten Strecke <span class="math inline">\(\overline{P_1P_2}\)</span>. Ist <span class="math inline">\(t&lt;0\)</span>, bewegt man sich dabei von <span class="math inline">\(P_2\)</span> fort, anosnsten aber auf <span class="math inline">\(P_2\)</span> zu. Ist <span class="math inline">\(0&lt;t&lt;1\)</span>, so endet der Weg zwischen <span class="math inline">\(P_1\)</span> und <span class="math inline">\(P_2\)</span>. Bei <span class="math inline">\(t&gt;1\)</span>, d.h. <span class="math inline">\(p&gt;s_3\)</span> geht der Weg über <span class="math inline">\(P_2\)</span> hinaus. Die Strecke <span class="math inline">\(s_3\)</span> ist die dem Punkt <span class="math inline">\(P_3\)</span> gegenüberliegende Seite in dem aus <span class="math inline">\(P_1\)</span>, <span class="math inline">\(P_2\)</span> und <span class="math inline">\(P_3\)</span> gebildeten Dreieck , also die Strecke <span class="math inline">\(\overline{P_1P_2}\)</span>. Nach Zurücklegen dieses ersten Wegabschnitts erreicht man den Lotfußpunkt <span class="math inline">\(P_L\)</span>.</p>
+<p>Ausgehend von <span class="math inline">\(P_1\)</span> bewegt man sich auf der mit dem Streckenparameter <span class="math inline">\(t=\frac{p}{s_3}\)</span> multiplizierten Strecke <span class="math inline">\(\overline{P_1P_2}\)</span>. Ist <span class="math inline">\(t&lt;0\)</span>, bewegt man sich dabei von <span class="math inline">\(P_2\)</span> fort, ansonsten aber auf <span class="math inline">\(P_2\)</span> zu. Ist <span class="math inline">\(0&lt;t&lt;1\)</span>, so endet der Weg zwischen <span class="math inline">\(P_1\)</span> und <span class="math inline">\(P_2\)</span>. Bei <span class="math inline">\(t&gt;1\)</span>, d.h. <span class="math inline">\(p&gt;s_3\)</span> geht der Weg über <span class="math inline">\(P_2\)</span> hinaus. Die Strecke <span class="math inline">\(s_3\)</span> ist die dem Punkt <span class="math inline">\(P_3\)</span> gegenüberliegende Seite in dem aus <span class="math inline">\(P_1\)</span>, <span class="math inline">\(P_2\)</span> und <span class="math inline">\(P_3\)</span> gebildeten Dreieck , also die Strecke <span class="math inline">\(\overline{P_1P_2}\)</span>. Nach Zurücklegen dieses ersten Wegabschnitts erreicht man den Lotfußpunkt <span class="math inline">\(P_L\)</span>.</p>
 <p>Im zweiten Schritt bewegt man sich weiter auf dem mit dem Streckenparameter <span class="math inline">\(u=\frac{h}{s_3}\)</span> multiplizierten orientierten Normalenvektor <span class="math inline">\((P_2-P_1)^{\circ}\)</span>. Der orientierte Normalenvektor steht im Drehsin des Koordinatensystems orthogonal zum Richtungsvektor (Drehsinn geodätisch: mit dem Uhrzeigersinn, kartesisch: entgegengesetzt). Das Plusminus-Vorzeichen lässt dabei ein Abbiegen sowohl nach links oder rechts zu. Die Position des Punktes <span class="math inline">\(P_3\)</span> links oder rechts der Strecke <span class="math inline">\(\overline{P_1P_2}\)</span> erschließt sich nicht aus den gegebenen beiden Punkten und Streckenlängen.</p>
 </div>
 <div id="bestimmung-von-s_32" class="section level3">
@@ -171,16 +171,47 @@ s_3^2&amp;=(x_2-x_1)^2+(y_2-y_1)^2\\\\
 \end{equation}\]</span></p>
 </div>
 <div id="bestimmung-des-ersten-streckenparameters-t" class="section level3">
-<h3>Bestimmung des ersten Streckenparameters t</h3>
+<h3>Bestimmung des ersten Streckenparameters <span class="math inline">\(t\)</span></h3>
 <p>Der Streckenparameter <span class="math inline">\(t=\frac{p}{s_3}\)</span> kann als Funktion von <span class="math inline">\(s_1\)</span>, <span class="math inline">\(s_2\)</span> und <span class="math inline">\(s_3^2\)</span> ermittelt werden.</p>
 <pre class="r"><code>t &lt;- param_ps3(s1, s2, s3quadrat)</code></pre>
 <p><span class="math display">\[\begin{equation}
 \begin{split}
-\frac{p}{s_3}&amp;=\frac{1}{2}(1+\frac{s_2^2}{s_3^2}-{s_1^2}{s_3^2})\\\\
+\frac{p}{s_3}&amp;=\frac{1}{2}(1+\frac{s_2^2}{s_3^2}-\frac{s_1^2}{s_3^2})\\\\
 &amp;\approx\frac{1}{2}(1+\frac{2,696.621}{1,953.205}-\frac{2,590.606}{1,953.205})\\\\
 &amp;\approx0.5271
 \end{split}
 \end{equation}\]</span></p>
+</div>
+<div id="bestimmung-des-zweiten-streckenparameters-u" class="section level3">
+<h3>Bestimmung des zweiten Streckenparameters <span class="math inline">\(u\)</span></h3>
+<p>Der zweite Streckenparameter <span class="math inline">\(u=\frac{h}{s_3}\)</span> kann als Funktion von <span class="math inline">\(s_2\)</span>, <span class="math inline">\(s_3^2\)</span> und dem ersten Streckenparameter <span class="math inline">\(t=\frac{p}{s_3}\)</span> ermittelt werden.</p>
+<pre class="r"><code>u &lt;- param_hs3(s2, s3quadrat, t)</code></pre>
+<p><span class="math display">\[\begin{equation}
+\begin{split}
+\frac{h}{s_3}&amp;=\sqrt{\frac{s_2^2}{s_3^2}-(\frac{p}{s_3})^2}\\\\
+&amp;\approx\sqrt{\frac{2,696.621}{1,953.205}-0.2779}\\\\
+&amp;\approx1.0501
+\end{split}
+\end{equation}\]</span></p>
+</div>
+<div id="bestimmung-der-koordinaten-des-punktes-p_3" class="section level3">
+<h3>Bestimmung der Koordinaten des Punktes <span class="math inline">\(P_3\)</span></h3>
+<p>Nach Berechnung der Parameter können nun mittels der Formel für den Bogenschnitt die Koordinaten des Punktes <span class="math inline">\(P_3\)</span> bestimmt werden.</p>
+<pre class="r"><code>if (position==&quot;right&quot; &amp; orientation==&quot;geodetic&quot; | position==&quot;left&quot; &amp; orientation==&quot;cartesian&quot;) {
+    vorzeichen &lt;- &quot;+&quot;
+} else if (position==&quot;left&quot; &amp; orientation==&quot;geodetic&quot; | position==&quot;right&quot; &amp; orientation==&quot;cartesian&quot;) {
+    vorzeichen &lt;- &quot;-&quot;
+}</code></pre>
+<p>Da dieser rechts von <span class="math inline">\(\overline{P_1P_2}\)</span> liegt und das Koordinatensystem geodätisch ist, erhält der Streckenparameter <span class="math inline">\(u=\frac{h}{s_3}\)</span> ein positives Vorzeichen (geodätischer Drehsinn: Uhrzeigersinn, kartesischer Drehsinn: gegen die Uhr).</p>
+<pre class="r"><code>P3 &lt;- bogenschnitt_P3(P1=P1, P2=P2, s1=s1, s2=s2, orientation=orientation, position=position)</code></pre>
+<p><span class="math display">\[\begin{equation}
+\begin{split}
+P_3&amp;=P_1+\frac{p}{s_3}(P_2-P_1)+\frac{h}{s_3}(P_2-P_1)^{\circ}\\\\
+&amp;\approx\binom{755.107}{97.938}+0.5271\binom{797.017-755.107}{111.965-97.938}+1.0501\binom{-(111.965-97.938)}{797.017-755.107}\\\\
+&amp;\approx\binom{762.4694}{149.3424}
+\end{split}
+\end{equation}\]</span></p>
+<p>Der Punkt <span class="math inline">\(P_3\)</span> hat die x-Koordinate 762.4694 und die y-Koordinate 149.3424.</p>
 </div>
 </div>
 

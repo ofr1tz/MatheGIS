@@ -20,10 +20,10 @@ s1 <- 50.898
 s2 <- 51.929
 
 orientation <- "geodetic" # Alternativ: "geodetic" | "cartesian"
-position <- "right" # Alternativen: "left" | "right" | NULL
+position <- "right" # Alternativen: "left" | "right"
 ```
 
-Gegeben seien die *`r if(orientation=="geodetic") "geodätischen" else if(orientation=="cartesian") "kartesischen" else "?"`* Koordinaten der Punkte $P_1=\binom{`r P1[1]`}{`r P1[2]`}$ und $P_2=\binom{`r P2[1]`}{`r P2[2]`}$ sowie die Strecken $s_1=`r s1`$ und $s_2=`r s2`$. Man bestimme die Koordinaten für den Punkt $P_3$`r if(position=="left") ", welcher links" else if(position=="right") ", welcher rechts" else ", welcher links oder rechts"` von $\overline{P_1P_2}$ liegt!
+Gegeben seien die *`r if(orientation=="geodetic") "geodätischen" else if(orientation=="cartesian") "kartesischen" else "?"`* Koordinaten der Punkte $P_1=\binom{`r P1[1]`}{`r P1[2]`}$ und $P_2=\binom{`r P2[1]`}{`r P2[2]`}$ sowie die Strecken $s_1=`r s1`$ und $s_2=`r s2`$. Man bestimme die Koordinaten für den Punkt $P_3$`r if(position=="left") ", welcher links" else if(position=="right") ", welcher rechts"` von $\overline{P_1P_2}$ liegt!
 
 ## Benötigte Erweiterungen
 ```{r requirements, message=FALSE, warning=FALSE}
@@ -46,7 +46,7 @@ $$P_3=P_1+\frac{p}{s_3}(P_2-P_1)\pm\frac{h}{s_3}(P_2-P_1)^{\circ}$$
 
 ### Beschreibung
 
-Ausgehend von $P_1$ bewegt man sich auf der mit dem Streckenparameter $t=\frac{p}{s_3}$ multiplizierten Strecke $\overline{P_1P_2}$. Ist $t<0$, bewegt man sich dabei von $P_2$ fort, anosnsten aber auf $P_2$ zu. Ist $0<t<1$, so endet der Weg zwischen $P_1$ und $P_2$. Bei $t>1$, d.h. $p>s_3$ geht der Weg über $P_2$ hinaus. Die Strecke $s_3$ ist die dem Punkt $P_3$ gegenüberliegende Seite in dem aus $P_1$, $P_2$ und $P_3$ gebildeten Dreieck , also die Strecke $\overline{P_1P_2}$. Nach Zurücklegen dieses ersten Wegabschnitts erreicht man den Lotfußpunkt $P_L$.
+Ausgehend von $P_1$ bewegt man sich auf der mit dem Streckenparameter $t=\frac{p}{s_3}$ multiplizierten Strecke $\overline{P_1P_2}$. Ist $t<0$, bewegt man sich dabei von $P_2$ fort, ansonsten aber auf $P_2$ zu. Ist $0<t<1$, so endet der Weg zwischen $P_1$ und $P_2$. Bei $t>1$, d.h. $p>s_3$ geht der Weg über $P_2$ hinaus. Die Strecke $s_3$ ist die dem Punkt $P_3$ gegenüberliegende Seite in dem aus $P_1$, $P_2$ und $P_3$ gebildeten Dreieck , also die Strecke $\overline{P_1P_2}$. Nach Zurücklegen dieses ersten Wegabschnitts erreicht man den Lotfußpunkt $P_L$.
 
 Im zweiten Schritt bewegt man sich weiter auf dem mit dem Streckenparameter $u=\frac{h}{s_3}$ multiplizierten orientierten Normalenvektor $(P_2-P_1)^{\circ}$. Der orientierte Normalenvektor steht im Drehsin des Koordinatensystems orthogonal zum Richtungsvektor (Drehsinn geodätisch: mit dem Uhrzeigersinn, kartesisch: entgegengesetzt). Das Plusminus-Vorzeichen lässt dabei ein Abbiegen sowohl nach links oder rechts zu. Die Position des Punktes $P_3$ links oder rechts der Strecke $\overline{P_1P_2}$ erschließt sich nicht aus den gegebenen beiden Punkten und Streckenlängen.
 
@@ -64,7 +64,7 @@ s_3^2&=(x_2-x_1)^2+(y_2-y_1)^2\\\\
 \end{split}
 \end{equation}$$
 
-### Bestimmung des ersten Streckenparameters t
+### Bestimmung des ersten Streckenparameters $t$
 
 Der Streckenparameter $t=\frac{p}{s_3}$ kann als Funktion von $s_1$, $s_2$ und $s_3^2$ ermittelt werden.
 
@@ -74,9 +74,53 @@ t <- param_ps3(s1, s2, s3quadrat)
 
 $$\begin{equation}
 \begin{split}
-\frac{p}{s_3}&=\frac{1}{2}(1+\frac{s_2^2}{s_3^2}-{s_1^2}{s_3^2})\\\\
+\frac{p}{s_3}&=\frac{1}{2}(1+\frac{s_2^2}{s_3^2}-\frac{s_1^2}{s_3^2})\\\\
 &\approx\frac{1}{2}(1+\frac{`r format(round(s2^2,4), big.mark=",")`}{`r format(round(s3quadrat,4), big.mark=",")`}-\frac{`r format(round(s1^2,4), big.mark=",")`}{`r format(round(s3quadrat,4), big.mark=",")`})\\\\
 &\approx`r format(round(t,4), big.mark=",")`
 \end{split}
 \end{equation}$$
 
+### Bestimmung des zweiten Streckenparameters $u$
+
+Der zweite Streckenparameter $u=\frac{h}{s_3}$ kann als Funktion von $s_2$, $s_3^2$ und dem ersten Streckenparameter $t=\frac{p}{s_3}$ ermittelt werden.
+
+```{r param_hs3}
+u <- param_hs3(s2, s3quadrat, t)
+```
+
+$$\begin{equation}
+\begin{split}
+\frac{h}{s_3}&=\sqrt{\frac{s_2^2}{s_3^2}-(\frac{p}{s_3})^2}\\\\
+&\approx\sqrt{\frac{`r format(round(s2^2,4), big.mark=",")`}{`r format(round(s3quadrat,4), big.mark=",")`}-`r format(round(t^2,4), big.mark=",")`}\\\\
+&\approx`r format(round(u,4), big.mark=",")`
+\end{split}
+\end{equation}$$
+
+### Bestimmung der Koordinaten des Punktes $P_3$
+
+Nach Berechnung der Parameter können nun mittels der Formel für den Bogenschnitt die Koordinaten des Punktes $P_3$ bestimmt werden.
+
+```{r sign}
+if (position=="right" & orientation=="geodetic" | position=="left" & orientation=="cartesian") {
+    vorzeichen <- "+"
+} else if (position=="left" & orientation=="geodetic" | position=="right" & orientation=="cartesian") {
+    vorzeichen <- "-"
+}
+```
+
+Da dieser `r if(position=="left") "links" else if(position=="right") "rechts"` von $\overline{P_1P_2}$ liegt und das Koordinatensystem `r if(orientation=="geodetic") "geodätisch" else if(orientation=="cartesian") "kartesisch" else "?"` ist, erhält der Streckenparameter $u=\frac{h}{s_3}$ ein `r if(vorzeichen=="+") "positives" else if(vorzeichen=="-") "negatives"` Vorzeichen (geodätischer Drehsinn: Uhrzeigersinn, kartesischer Drehsinn: gegen die Uhr).
+
+```{r bogenschnitt}
+P3 <- bogenschnitt_P3(P1=P1, P2=P2, s1=s1, s2=s2, orientation=orientation, position=position)
+```
+
+$$\begin{equation}
+\begin{split}
+P_3&=P_1+\frac{p}{s_3}(P_2-P_1)`r vorzeichen`\frac{h}{s_3}(P_2-P_1)^{\circ}\\\\
+&\approx\binom{`r P1[1]`}{`r P1[2]`}+`r format(round(t,4), big.mark=",")`\binom{`r P2[1]`-`r P1[1]`}{`r P2[2]`-`r P1[2]`}`r vorzeichen``r format(round(u,4), big.mark=",")`\binom{-(`r P2[2]`-`r P1[2]`)}{`r P2[1]`-`r P1[1]`}\\\\
+&\approx\binom{`r format(round(P3[1],4), big.mark=",")`}{`r format(round(P3[2],4), big.mark=",")`}
+\end{split}
+\end{equation}$$
+
+
+Der Punkt $P_3$ hat die x-Koordinate `r format(round(P3[1],4), big.mark=",")` und die y-Koordinate `r format(round(P3[2],4), big.mark=",")`.
