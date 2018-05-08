@@ -1,5 +1,5 @@
 ---
-title: "Bogenschnitt"
+title: "Bogenschnitt mittels orientierter Wegbeschreibung"
 author: "Oliver Fritz"
 output: html_document
 ---
@@ -14,16 +14,16 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Hier die Parameter des Bogenschnitts einfügen/anpassen:
 
-P1 <- c(755.107, 97.938)
-P2 <- c(797.017, 111.965)
-s1 <- 50.898
-s2 <- 51.929
+P1 <- c(176678, 9783668)
+P2 <- c(178956, 9783624)
+s1 <- 1114
+s2 <- 1224
 
-orientation <- "geodetic" # Alternativ: "geodetic" | "cartesian"
-position <- "right" # Alternativen: "left" | "right"
+orientation <- "cartesian" # Optionen: "geodetic" | "cartesian"
+position <- "left" # Optionen: "left" | "right"
 ```
 
-Gegeben seien die *`r if(orientation=="geodetic") "geodätischen" else if(orientation=="cartesian") "kartesischen" else "?"`* Koordinaten der Punkte $P_1=\binom{`r P1[1]`}{`r P1[2]`}$ und $P_2=\binom{`r P2[1]`}{`r P2[2]`}$ sowie die Strecken $s_1=`r s1`$ und $s_2=`r s2`$. Man bestimme die Koordinaten für den Punkt $P_3$`r if(position=="left") ", welcher links" else if(position=="right") ", welcher rechts"` von $\overline{P_1P_2}$ liegt!
+Gegeben seien die *`r if(orientation=="geodetic") "geodätischen" else if(orientation=="cartesian") "kartesischen" else "?"`* Koordinaten der Punkte $P_1=\binom{`r format(P1[1])`}{`r format(P1[2])`}$ und $P_2=\binom{`r format(P2[1])`}{`r format(P2[2])`}$ sowie die Strecken $s_1=`r s1`$ und $s_2=`r s2`$. Man bestimme die Koordinaten für den Punkt $P_3$`r if(position=="left") ", welcher links" else if(position=="right") ", welcher rechts"` von $\overline{P_1P_2}$ liegt!
 
 ## Benötigte Erweiterungen
 ```{r requirements, message=FALSE, warning=FALSE}
@@ -59,8 +59,8 @@ s3quadrat <- streckenquadrat(P1, P2)
 $$\begin{equation}
 \begin{split}
 s_3^2&=(x_2-x_1)^2+(y_2-y_1)^2\\\\
-&=(`r P2[1]`-`r P1[1]`)^2+(`r P2[2]`-`r P1[2]`)^2\\\\
-&\approx`r format(round(s3quadrat,4), big.mark=",")`
+&=(`r format(P2[1])`-`r format(P1[1])`)^2+(`r format(P2[2])`-`r format(P1[2])`)^2\\\\
+&\approx`r format(round(s3quadrat,4))`
 \end{split}
 \end{equation}$$
 
@@ -75,8 +75,8 @@ t <- param_ps3(s1, s2, s3quadrat)
 $$\begin{equation}
 \begin{split}
 \frac{p}{s_3}&=\frac{1}{2}(1+\frac{s_2^2}{s_3^2}-\frac{s_1^2}{s_3^2})\\\\
-&\approx\frac{1}{2}(1+\frac{`r format(round(s2^2,4), big.mark=",")`}{`r format(round(s3quadrat,4), big.mark=",")`}-\frac{`r format(round(s1^2,4), big.mark=",")`}{`r format(round(s3quadrat,4), big.mark=",")`})\\\\
-&\approx`r format(round(t,4), big.mark=",")`
+&\approx\frac{1}{2}(1+\frac{`r format(round(s2^2,4))`}{`r format(round(s3quadrat,4))`}-\frac{`r format(round(s1^2,4))`}{`r format(round(s3quadrat,4))`})\\\\
+&\approx`r format(round(t,4))`
 \end{split}
 \end{equation}$$
 
@@ -91,36 +91,34 @@ u <- param_hs3(s2, s3quadrat, t)
 $$\begin{equation}
 \begin{split}
 \frac{h}{s_3}&=\sqrt{\frac{s_2^2}{s_3^2}-(\frac{p}{s_3})^2}\\\\
-&\approx\sqrt{\frac{`r format(round(s2^2,4), big.mark=",")`}{`r format(round(s3quadrat,4), big.mark=",")`}-`r format(round(t^2,4), big.mark=",")`}\\\\
-&\approx`r format(round(u,4), big.mark=",")`
+&\approx\sqrt{\frac{`r format(round(s2^2,4))`}{`r format(round(s3quadrat,4))`}-`r format(round(t^2,4))`}\\\\
+&\approx`r format(round(u,4))`
 \end{split}
 \end{equation}$$
 
 ### Bestimmung der Koordinaten des Punktes $P_3$
 
 Nach Berechnung der Parameter können nun mittels der Formel für den Bogenschnitt die Koordinaten des Punktes $P_3$ bestimmt werden.
-
-```{r sign}
+```{r sign, echo=FALSE}
 if (position=="right" & orientation=="geodetic" | position=="left" & orientation=="cartesian") {
     vorzeichen <- "+"
 } else if (position=="left" & orientation=="geodetic" | position=="right" & orientation=="cartesian") {
     vorzeichen <- "-"
 }
 ```
-
-Da dieser `r if(position=="left") "links" else if(position=="right") "rechts"` von $\overline{P_1P_2}$ liegt und das Koordinatensystem `r if(orientation=="geodetic") "geodätisch" else if(orientation=="cartesian") "kartesisch" else "?"` ist, erhält der Streckenparameter $u=\frac{h}{s_3}$ ein `r if(vorzeichen=="+") "positives" else if(vorzeichen=="-") "negatives"` Vorzeichen (geodätischer Drehsinn: Uhrzeigersinn, kartesischer Drehsinn: gegen die Uhr).
-
 ```{r bogenschnitt}
 P3 <- bogenschnitt_P3(P1=P1, P2=P2, s1=s1, s2=s2, orientation=orientation, position=position)
 ```
 
+Da $P_3$ `r if(position=="left") "links" else if(position=="right") "rechts"` von $\overline{P_1P_2}$ liegt und das Koordinatensystem `r if(orientation=="geodetic") "geodätisch" else if(orientation=="cartesian") "kartesisch" else "?"` ist, erhält der Streckenparameter $u=\frac{h}{s_3}$ ein `r if(vorzeichen=="+") "positives" else if(vorzeichen=="-") "negatives"` Vorzeichen (geodätischer Drehsinn: Uhrzeigersinn, kartesischer Drehsinn: gegen die Uhr).
+
 $$\begin{equation}
 \begin{split}
 P_3&=P_1+\frac{p}{s_3}(P_2-P_1)`r vorzeichen`\frac{h}{s_3}(P_2-P_1)^{\circ}\\\\
-&\approx\binom{`r P1[1]`}{`r P1[2]`}+`r format(round(t,4), big.mark=",")`\binom{`r P2[1]`-`r P1[1]`}{`r P2[2]`-`r P1[2]`}`r vorzeichen``r format(round(u,4), big.mark=",")`\binom{-(`r P2[2]`-`r P1[2]`)}{`r P2[1]`-`r P1[1]`}\\\\
-&\approx\binom{`r format(round(P3[1],4), big.mark=",")`}{`r format(round(P3[2],4), big.mark=",")`}
+&\approx\binom{`r format(P1[1])`}{`r format(P1[2])`}+`r format(round(t,4))`\binom{`r format(P2[1])`-`r format(P1[1])`}{`r format(P2[2])`-`r format(P1[2])`}`r vorzeichen``r format(round(u,4))`\binom{-(`r format(P2[2])`-`r format(P1[2])`)}{`r format(P2[1])`-`r format(P1[1])`}\\\\
+&\approx\binom{`r format(round(P3[1],4))`}{`r format(round(P3[2],4))`}
 \end{split}
 \end{equation}$$
 
 
-Der Punkt $P_3$ hat die x-Koordinate `r format(round(P3[1],4), big.mark=",")` und die y-Koordinate `r format(round(P3[2],4), big.mark=",")`.
+Der Punkt $P_3$ hat die x-Koordinate `r format(round(P3[1],4))` und die y-Koordinate `r format(round(P3[2],4))`.
