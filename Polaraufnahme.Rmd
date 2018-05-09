@@ -1,0 +1,78 @@
+---
+title: "Polaraufnahme mittels orientierter Wegbeschreibung"
+author: "Oliver Fritz"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Aufgabenstellung
+
+```{r gegeben}
+
+# Hier die Parameter der Polaraufnahme einfügen/anpassen:
+
+P1 <- c(176678, 9783668)
+P2 <- c(178956, 9783624)
+alpha1 <- 16
+s2 <- 1224
+
+angle_unit <- "gon" # Optionen: "deg" | "rad" | "gon" bzw. "grad"
+orientation <- "cartesian" # Optionen: "geodetic" | "cartesian"
+```
+
+```{r einheit, echo=FALSE}
+if(angle_unit=="deg") {
+      sym <- "°"
+} else if(angle_unit=="gon" | angle_unit=="grad") {
+      sym <- "\\text{ gon}"
+} else if(angle_unit=="rad") {
+      sym <- "\\text{ rad}"
+} else sym <- ""
+```
+
+Gegeben seien die *`r if(orientation=="geodetic") "geodätischen" else if(orientation=="cartesian") "kartesischen" else "?"`* Koordinaten der Punkte $P_1=\binom{`r format(P1[1])`}{`r format(P1[2])`}$ und $P_2=\binom{`r format(P2[1])`}{`r format(P2[2])`}$ sowie der Winkel $\alpha_1=`r paste0(alpha1, sym)`$ und die Strecke $s_2=`r s2`$. Man bestimme die Lage und die Koordinaten des Punktes $P_3$!
+
+## Benötigte Erweiterungen
+```{r requirements, message=FALSE, warning=FALSE}
+require(tidyverse)
+require(utils)
+source("MatheGIS.R")
+```
+
+## Graphische Darstellung
+
+```{r plot}
+plot_polaraufnahme(P1=P1, P2=P2, alpha1=alpha1, s2=s2, angle_unit=angle_unit, orientation=orientation)
+```
+
+## Lösung
+
+### Lage
+```{r lage}
+quadrant <- quadrant_P3(alpha1, angle_unit)
+```
+Aus dem Wert des Winkels $\alpha_1=`r paste0(alpha1, sym)`$ kann geschlossen werden, dass sich $P_3$ im **`r as.character(as.roman(quadrant))`. Quadranten** befindet:
+
+* Der Lotfußpunkt liegt also `r if(quadrant==2|quadrant==3) "**hinter der Strecke $\\overline{P_1 P_2}$**" else "**vor $P_1$** auf der Strecke $\\overline{P_1 P_2}$ (oder darüber hinaus)"`. 
+
+* Im `r if(orientation=="cartesian") "kartesischen" else "geodätischen"` Koordinatensystem liegt P3 `r if(orientation=="cartesian" & quadrant<=2 | orientation=="geodetic" & quadrant>2) "**links**" else "**rechts**"` der Strecke $\overline{P_1 P_2}$.
+
+### Berechnung
+Die Lösung der Polaraufnahme mittels orientierter Wegbeschreibung hat zunächst folgende Form:
+$$P_3=P_1+\frac{p}{s_3}(P_2-P_1)+\frac{h}{s_3}(P_2-P_1)^{\circ}$$
+Da $p=s_2\cos\alpha$ und $h=s_2\sin\alpha$, kann man p und h durch Einsetzen aus der Gleichung entfernen und erhält nach Ausklammern:
+$$P_3=P_1+\frac{s_2}{s_3}(\cos\alpha_1(P_2-P_1)+\sin\alpha_1(P_2-P_1)^{\circ})$$
+
+### Beschreibung
+
+### Bestimmung der Koordinaten des Punktes $P_3$
+
+Nach Berechnung der Parameter können nun mittels der Formel für die Polaraufnahme die Koordinaten des Punktes $P_3$ bestimmt werden.
+
+```{r polaraufnahme}
+P3 <- polaraufnahme_P3(P1=P1, P2=P2, alpha1=alpha1, s2=s2, angle_unit=angle_unit)
+P3
+```

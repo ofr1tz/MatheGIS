@@ -50,7 +50,7 @@ Ausgehend von $P_1$ bewegt man sich auf der mit dem Streckenparameter $t=\frac{p
 
 Im zweiten Schritt bewegt man sich weiter auf dem mit dem Streckenparameter $u=\frac{h}{s_3}$ multiplizierten orientierten Normalenvektor $(P_2-P_1)^{\circ}$. Der orientierte Normalenvektor steht im Drehsin des Koordinatensystems orthogonal zum Richtungsvektor (Drehsinn geodätisch: mit dem Uhrzeigersinn, kartesisch: entgegengesetzt). Das Plusminus-Vorzeichen lässt dabei ein Abbiegen sowohl nach links oder rechts zu. Die Position des Punktes $P_3$ links oder rechts der Strecke $\overline{P_1P_2}$ erschließt sich nicht aus den gegebenen beiden Punkten und Streckenlängen.
 
-### Bestimmung von $s_3^2$
+### Bestimmung von ${s_3}^2$
 Zunächst berechnen wir das Quadrat der Strecke $s_3$ aus den Koordinaten der Punkte $P_1$ und $P_2$:
 ```{r s3quadrat}
 s3quadrat <- streckenquadrat(P1, P2)
@@ -58,7 +58,7 @@ s3quadrat <- streckenquadrat(P1, P2)
 
 $$\begin{equation}
 \begin{split}
-s_3^2&=(x_2-x_1)^2+(y_2-y_1)^2\\\\
+{s_3}^2&=(x_2-x_1)^2+(y_2-y_1)^2\\\\
 &=(`r format(P2[1])`-`r format(P1[1])`)^2+(`r format(P2[2])`-`r format(P1[2])`)^2\\\\
 &\approx`r format(round(s3quadrat,4))`
 \end{split}
@@ -66,7 +66,7 @@ s_3^2&=(x_2-x_1)^2+(y_2-y_1)^2\\\\
 
 ### Bestimmung des ersten Streckenparameters $t$
 
-Der Streckenparameter $t=\frac{p}{s_3}$ kann als Funktion von $s_1$, $s_2$ und $s_3^2$ ermittelt werden.
+Der Streckenparameter $t=\frac{p}{s_3}$ kann als Funktion von $s_1$, $s_2$ und ${s_3}^2$ ermittelt werden.
 
 ```{r param_ps3}
 t <- param_ps3(s1, s2, s3quadrat)
@@ -74,7 +74,7 @@ t <- param_ps3(s1, s2, s3quadrat)
 
 $$\begin{equation}
 \begin{split}
-\frac{p}{s_3}&=\frac{1}{2}(1+\frac{s_2^2}{s_3^2}-\frac{s_1^2}{s_3^2})\\\\
+\frac{p}{s_3}&=\frac{1}{2}(1+\frac{{s_2}^2}{{s_3}^2}-\frac{{s_1}^2}{{s_3}^2})\\\\
 &\approx\frac{1}{2}(1+\frac{`r format(round(s2^2,4))`}{`r format(round(s3quadrat,4))`}-\frac{`r format(round(s1^2,4))`}{`r format(round(s3quadrat,4))`})\\\\
 &\approx`r format(round(t,4))`
 \end{split}
@@ -82,7 +82,7 @@ $$\begin{equation}
 
 ### Bestimmung des zweiten Streckenparameters $u$
 
-Der zweite Streckenparameter $u=\frac{h}{s_3}$ kann als Funktion von $s_2$, $s_3^2$ und dem ersten Streckenparameter $t=\frac{p}{s_3}$ ermittelt werden.
+Der zweite Streckenparameter $u=\frac{h}{s_3}$ kann als Funktion von $s_2$, ${s_3}^2$ und dem ersten Streckenparameter $t=\frac{p}{s_3}$ ermittelt werden.
 
 ```{r param_hs3}
 u <- param_hs3(s2, s3quadrat, t)
@@ -90,7 +90,7 @@ u <- param_hs3(s2, s3quadrat, t)
 
 $$\begin{equation}
 \begin{split}
-\frac{h}{s_3}&=\sqrt{\frac{s_2^2}{s_3^2}-(\frac{p}{s_3})^2}\\\\
+\frac{h}{s_3}&=\sqrt{\frac{{s_2}^2}{{s_3}^2}-(\frac{p}{s_3})^2}\\\\
 &\approx\sqrt{\frac{`r format(round(s2^2,4))`}{`r format(round(s3quadrat,4))`}-`r format(round(t^2,4))`}\\\\
 &\approx`r format(round(u,4))`
 \end{split}
