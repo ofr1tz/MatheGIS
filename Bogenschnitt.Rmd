@@ -27,7 +27,6 @@ Gegeben seien die *`r if(orientation=="geodetic") "geodätischen" else if(orient
 
 ## Benötigte Erweiterungen
 ```{r requirements, message=FALSE, warning=FALSE}
-require(tidyverse)
 source("MatheGIS.R")
 ```
 
