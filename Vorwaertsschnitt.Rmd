@@ -1,5 +1,5 @@
 ---
-title: "Polaraufnahme mittels orientierter Wegbeschreibung"
+title: "Vorwärtsschnitt mittels orientierter Wegbeschreibung"
 author: "Oliver Fritz"
 output: html_document
 ---
@@ -17,7 +17,7 @@ knitr::opts_chunk$set(echo = TRUE)
 P1 <- c(176678, 9783668)
 P2 <- c(178956, 9783624)
 alpha1 <- 13.73998
-s2 <- 1224
+alpha2 <- 15.12171
 
 angle_unit <- "gon" # Optionen: "deg" | "rad" | "gon" bzw. "grad"
 orientation <- "cartesian" # Optionen: "geodetic" | "cartesian"
@@ -33,7 +33,7 @@ if(angle_unit=="deg") {
 } else sym <- ""
 ```
 
-Gegeben seien die *`r if(orientation=="geodetic") "geodätischen" else if(orientation=="cartesian") "kartesischen" else "?"`* Koordinaten der Punkte $P_1=\binom{`r format(P1[1])`}{`r format(P1[2])`}$ und $P_2=\binom{`r format(P2[1])`}{`r format(P2[2])`}$ sowie der Richtungswinkel $\alpha_1=`r paste0(alpha1, sym)`$ und die Strecke $s_2=`r s2`$. Man bestimme die Lage und die Koordinaten des Punktes $P_3$!
+Gegeben seien die *`r if(orientation=="geodetic") "geodätischen" else if(orientation=="cartesian") "kartesischen" else "?"`* Koordinaten der Punkte $P_1=\binom{`r format(P1[1])`}{`r format(P1[2])`}$ und $P_2=\binom{`r format(P2[1])`}{`r format(P2[2])`}$ sowie die Richtungswinkel $\alpha_1=`r paste0(alpha1, sym)`$ und $\alpha_2=`r paste0(alpha2, sym)`$. Man bestimme die Lage und die Koordinaten des Punktes $P_3$!
 
 ## Benötigte Erweiterungen
 ```{r requirements, message=FALSE, warning=FALSE}
@@ -43,7 +43,7 @@ source("MatheGIS.R")
 ## Graphische Darstellung
 
 ```{r plot}
-plot_polaraufnahme(P1=P1, P2=P2, alpha1=alpha1, s2=s2, angle_unit=angle_unit, orientation=orientation)
+plot_vorwaertsschnitt(P1=P1, P2=P2, alpha1=alpha1, alpha2=alpha2, angle_unit=angle_unit, orientation=orientation)
 ```
 
 ## Lösung
@@ -61,35 +61,22 @@ Aus dem Wert des Richtungswinkels $\alpha_1=`r paste0(alpha1, sym)`$ kann geschl
 ### Berechnung
 Die Lösung der Polaraufnahme mittels orientierter Wegbeschreibung hat zunächst folgende Form:
 $$P_3=P_1+\frac{p}{s_3}(P_2-P_1)+\frac{h}{s_3}(P_2-P_1)^{\circ}$$
-Da $p=s_2\cos\alpha_1$ und $h=s_2\sin\alpha_1$, kann man den Höhenabschnitt $p$ und die Höhe $h$ durch Einsetzen aus der Gleichung entfernen und erhält nach Ausklammern:
-$$P_3=P_1+\frac{s_2}{s_3}(\cos\alpha_1(P_2-P_1)+\sin\alpha_1(P_2-P_1)^{\circ})$$
+Da $\frac{p}{s_3}=\frac{\cot\alpha_1}{\cot\alpha_1+\cot\alpha_2}$ und $\frac{h}{s_3}=\frac{1}{\cot\alpha_1+\cot\alpha_2}$, kann man den Höhenabschnitt $p$, die Höhe $h$ und die Strecke $s_3$ durch Einsetzen aus der Gleichung entfernen und erhält nach Ausklammern:
+$$P_3=P_1+\frac{1}{\cot\alpha_1+\cot\alpha_2}(\cot\alpha_1(P_2-P_1)+(P_2-P_1)^{\circ})$$
 
-### Bestimmung von ${s_3}$
-Zunächst berechnen wir die Streckenlänge $s_3$ aus den Koordinaten der Punkte $P_1$ und $P_2$:
-```{r s3quadrat}
-s3 <- strecke(P1, P2)
-```
-
-$$\begin{equation}
-\begin{split}
-{s_3}&=\sqrt{(x_2-x_1)^2+(y_2-y_1)^2}\\\\
-&=\sqrt{(`r format(P2[1])`-`r format(P1[1])`)^2+(`r format(P2[2])`-`r format(P1[2])`)^2}\\\\
-&\approx`r format(round(s3,4))`
-\end{split}
-\end{equation}$$
 
 ### Bestimmung der Koordinaten des Punktes $P_3$
 
 Nun können mittels der Formel für die Polaraufnahme die Koordinaten des Punktes $P_3$ bestimmt werden.
 
-```{r polaraufnahme}
-P3 <- polaraufnahme_P3(P1=P1, P2=P2, alpha1=alpha1, s2=s2, angle_unit=angle_unit)
+```{r vorwaertsschnitt}
+P3 <- vorwaertsschnitt_P3(P1=P1, P2=P2, alpha1=alpha1, alpha2=alpha2, angle_unit=angle_unit)
 ```
 
 $$\begin{equation}
 \begin{split}
-P_3&=P_1+\frac{s_2}{s_3}(\cos\alpha_1(P_2-P_1)+\sin\alpha_1(P_2-P_1)^{\circ})\\\\
-&\approx\binom{`r format(P1[1])`}{`r format(P1[2])`}+\frac{`r s2`}{`r format(round(s3, 4))`}(`r format(round(cos(umrechnenWinkel(alpha1, angle_unit, "rad")), 4))`\binom{`r format(P2[1])`-`r format(P1[1])`}{`r format(P2[2])`-`r format(P1[2])`}+`r format(round(sin(umrechnenWinkel(alpha1, angle_unit, "rad")), 4))`\binom{-(`r format(P2[2])`-`r format(P1[2])`)}{`r format(P2[1])`-`r format(P1[1])`})\\\\
+P_3&=P_1+\frac{1}{\cot\alpha_1+\cot\alpha_2}(\cot\alpha_1(P_2-P_1)+(P_2-P_1)^{\circ})\\\\
+&\approx\binom{`r format(P1[1])`}{`r format(P1[2])`}+\frac{1}{`r format(round(1/tan(umrechnenWinkel(alpha1, angle_unit, "rad")), 4))`+`r format(round(1/tan(umrechnenWinkel(alpha2, angle_unit, "rad")), 4))`}(`r format(round(1/tan(umrechnenWinkel(alpha1, angle_unit, "rad")), 4))`\binom{`r format(P2[1])`-`r format(P1[1])`}{`r format(P2[2])`-`r format(P1[2])`}+\binom{-(`r format(P2[2])`-`r format(P1[2])`)}{`r format(P2[1])`-`r format(P1[1])`})\\\\
 &\approx\binom{`r format(round(P3[1],4))`}{`r format(round(P3[2],4))`}
 \end{split}
 \end{equation}$$

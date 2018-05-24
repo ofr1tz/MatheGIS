@@ -20,6 +20,41 @@ umrechnenWinkel <- function(
     alpha*halbkreis[[ziel]]/halbkreis[[quelle]]
 }
 
+## Berechnet den Kotangens
+cot <- function(alpha) 1/tan(alpha)
+
+## Berechnet Winkel aus drei Seiten mithilfe des Kosinussatzes
+## und gibt ihn in gewünschter Einheit aus
+winkel_kosinus_seiten <- function(s1, s2, s3, angle_unit=c("deg", "grad", "gon", "rad")) {
+    umrechnenWinkel(acos((s1^2-s2^2-s3^2)/(2*s2*s3)), 
+                    "rad", 
+                    angle_unit)
+}
+
+## Berechnet Winkel an Punkt 1 aus drei Punkten mithilfe des Kosinussatzes
+## und gibt ihn in gewünschter Einheit aus
+winkel_kosinus_punkte <- function(P1, P2, P3, angle_unit=c("deg", "grad", "gon", "rad")) {
+    
+    umrechnenWinkel(acos(-1*(skalarprodukt(P1-P3, P2-P1)/(strecke(P3, P1)*strecke(P1, P2)))),
+                    "rad",
+                    angle_unit)
+}
+
+## Berechnet Winkel an Punkt 1 aus drei Punkten mithilfe zweier Skalarprodukte und Kotangens
+## und gibt ihn in gewünschter Einheit aus
+winkel_kotangens_punkte <- function(P1, P2, P3, angle_unit=c("deg", "grad", "gon", "rad")) {
+    
+    umrechnenWinkel(atan(1/(c(1,-1)*(skalarprodukt(P3-P1, P2-P1)/skalarprodukt(P3-P1, onv(P2-P1))))),
+                    "rad",
+                    angle_unit)
+}
+
+## Berechnet das Skalarprodukt zweier Vektoren aus Koordinaten
+skalarprodukt <- function(V1,V2) {
+    V1[1]*V2[1]+V1[2]*V2[2]
+}
+
+
 ## Bestimmt den orientierten Normalenvektor (onv) aus einem directionalVector
 ## Der onv steht im Drehsin des Koordinatensystems orthogonal zum directionalVector
 ## Drehsinn geodaetisch -> mit dem Uhrzeigersinn, kartesisch -> gegen die Uhr
@@ -114,6 +149,7 @@ plot_polaraufnahme <- function(
         "P3", P3[1], P3[2])
     nudge_x <- (range(dat["x"])[2]-range(dat["x"])[1])/20
     PL <- lotfuss(P1, P2, (s2*cos(alpha1))/strecke(P1,P2))
+    Ponv <- PL+onv(P2-P1)
     
     g <- ggplot()+
         # circle around P1 with radius s2
@@ -122,6 +158,25 @@ plot_polaraufnahme <- function(
             x=P1[1]+s2*cos(seq(0,2*pi,length.out=100)),
             y=P1[2]+s2*sin(seq(0,2*pi,length.out=100)),
             col="grey")+
+        # PL + orientierter Normalenvektor (P2-P1)°
+        geom_segment(aes(
+            x=PL[1],
+            y=PL[2],
+            xend=Ponv[1],
+            yend=Ponv[2]),
+            arrow=arrow(
+                length=unit(12, "points"),
+                angle=20,
+                type="closed"),
+            col="darkgrey")+
+        # label (P2-P1)°
+        geom_text(aes(x=mean(c(PL[1], Ponv[1])),
+                      y=mean(c(PL[2], Ponv[2]))),
+                  label="(P2-P1)^o",
+                  nudge_x=nudge_x,
+                  hjust=0,
+                  col="grey",
+                  alpha=.67)+
         # P1 to P2 (s3)
         geom_segment(aes(
             x=dat[1,"x"],
@@ -230,6 +285,182 @@ plot_polaraufnahme <- function(
 ### Die Punkte P1 und P2 bekannt, die Winkel alpha1 und alpha2 sind gemessen.
 ### Gesucht ist der Punkt P3.
 
+#### Berechnet den Punkt P3 aus P1, P2, alpha1 und s2
+vorwaertsschnitt_P3 <- function(
+    P1=c(0,0),
+    P2=c(0,0),
+    alpha1=0,
+    alpha2=0,
+    angle_unit=c("deg","grad","gon","rad")) {
+    
+    alpha1 <- umrechnenWinkel(alpha1, angle_unit, "rad")
+    alpha2 <- umrechnenWinkel(alpha2, angle_unit, "rad")
+    
+    P1+1/(cot(alpha1)+cot(alpha2))*(cot(alpha1)*(P2-P1)+onv(P2-P1))
+}
+
+#### Visualisiert des Vorwaertsschnitts
+## Hier noch hinzufügen: Visualisierung von alpha1 und alpha2!
+plot_vorwaertsschnitt <- function(
+    P1=c(0,0),
+    P2=c(0,0),
+    P3=NULL,
+    alpha1=0,
+    alpha2=0,
+    angle_unit=c("deg","grad","gon","rad"),
+    orientation=c("geodetic", "cartesian")) {
+    
+    if(is.null(P3)) P3 <- vorwaertsschnitt_P3(P1, P2, alpha1, alpha2, angle_unit)
+    alpha1 <- umrechnenWinkel(alpha1, angle_unit, "rad")
+    alpha2 <- umrechnenWinkel(alpha2, angle_unit, "rad")
+    
+    dat <- tribble(
+        ~point, ~x, ~y, 
+        "P1", P1[1], P1[2], 
+        "P2", P2[1], P2[2], 
+        "P3", P3[1], P3[2])
+    nudge_x <- (range(dat["x"])[2]-range(dat["x"])[1])/20
+    PL <- lotfuss(P1, P2, (1/tan(alpha1))/(1/tan(alpha1)+1/tan(alpha2)))
+    Ponv <- PL+onv(P2-P1)
+
+        g <- ggplot()+
+        # PL + orientierter Normalenvektor (P2-P1)°
+        geom_segment(aes(
+            x=PL[1],
+            y=PL[2],
+            xend=Ponv[1],
+            yend=Ponv[2]),
+            arrow=arrow(
+                length=unit(12, "points"),
+                angle=20,
+                type="closed"),
+            col="darkgrey")+
+        # label (P2-P1)°
+        geom_text(aes(x=mean(c(PL[1], Ponv[1])),
+                      y=mean(c(PL[2], Ponv[2]))),
+                  label="(P2-P1)^o",
+                  nudge_x=nudge_x,
+                  hjust=0,
+                  col="grey",
+                  alpha=.67)+
+        # P1 to P2 (s3)
+        geom_segment(aes(
+            x=dat[1,"x"],
+            y=dat[1,"y"],
+            xend=dat[2,"x"],
+            yend=dat[2,"y"]),
+            arrow=arrow(
+                length=unit(12, "points"),
+                angle=20,
+                type="closed"),
+            col="darkgrey")+
+        # label s3
+        geom_text(aes(x=mean(c(P1[1], P2[1])),
+                      y=mean(c(P1[2], P2[2]))),
+                  label="s3",
+                  nudge_x=nudge_x,
+                  hjust=0,
+                  col="grey",
+                  alpha=.67)+
+        # first path segment from P1 to P3 (p)
+        geom_segment(aes(
+            x=dat[1,"x"],
+            y=dat[1,"y"],
+            xend=PL[1],
+            yend=PL[2]),
+            arrow=arrow(
+                length=unit(12, "points"),
+                angle=20,
+                type="closed"),
+            linetype="dashed",
+            col="red")+
+        # label p
+        geom_text(aes(x=mean(c(P1[1], PL[1])),
+                      y=mean(c(P1[2], PL[2]))),
+                  label="p",
+                  nudge_x=nudge_x,
+                  hjust=0,
+                  col="red",
+                  alpha=.5)+
+        # second path segment from P1 to P3 (h)
+        geom_segment(aes(
+            x=PL[1],
+            y=PL[2],
+            xend=dat[3, "x"],
+            yend=dat[3, "y"]),
+            arrow=arrow(
+                length=unit(12, "points"),
+                angle=20,
+                type="closed"),
+            linetype="dashed",
+            col="red")+
+        # label h
+        geom_text(aes(x=mean(c(PL[1], P3[1])),
+                      y=mean(c(PL[2], P3[2]))),
+                  label="h",
+                  nudge_x=nudge_x,
+                  hjust=0,
+                  col="red",
+                  alpha=.5)+
+        # s2
+        annotate(
+            "path",
+            x=dat[c(3,1), "x"],
+            y=dat[c(3,1), "y"], 
+            col="grey")+
+        # label s2
+        geom_text(aes(x=mean(c(P1[1], P3[1])),
+                      y=mean(c(P1[2], P3[2]))),
+                  label="s2",
+                  nudge_x=nudge_x,
+                  hjust=0,
+                  col="grey",
+                  alpha=.67)+
+        # s1
+        annotate(
+            "path",
+            x=dat[c(3,2), "x"],
+            y=dat[c(3,2), "y"], 
+            col="grey")+
+        # label s1
+        geom_text(aes(x=mean(c(P2[1], P3[1])),
+                      y=mean(c(P2[2], P3[2]))),
+                  label="s1",
+                  nudge_x=nudge_x,
+                  hjust=0,
+                  col="grey",
+                  alpha=.67)+
+        # axis labels
+        labs(x="x", y="y")+
+        # point labels
+        geom_text(
+            data=dat, 
+            aes(x=x, y=y, label=point),
+            nudge_x=nudge_x,
+            hjust=0,
+            alpha=.5)+
+        geom_text(
+            aes(x=PL[1], y=PL[2], label="PL"),
+            nudge_x=nudge_x,
+            hjust=0,
+            col="red",
+            alpha=.5
+        )+
+        # fix x and y axis and equal distance between units
+        coord_equal()+
+        theme_minimal()
+    
+    # flip coordinate system if orientation is geodetic instead of cartesian
+    if(orientation=="geodetic") {
+        xlim=ggplot_build(g)$layout$panel_ranges[[1]]$x.range
+        ylim=ggplot_build(g)$layout$panel_ranges[[1]]$y.range
+        g <- g+coord_flip(xlim=xlim, ylim=ylim)+
+        theme(aspect.ratio=1)
+    }
+    else if(orientation!="cartesian") warning("Invalid orientation paramenter. Coordinate system defaulted to cartesian")
+    
+    print(g)
+}
 
 ### Bogenschnitt
 ### Die Punkte P1 und P2 bekannt, die Strecken s1 und s2 sind gemessen.
@@ -276,6 +507,7 @@ plot_bogenschnitt <- function(
         "P3 rechts", P3_right[1], P3_right[2])
     nudge_x <- (range(dat["x"])[2]-range(dat["x"])[1])/20
     PL <- lotfuss(P1, P2, param_ps3(s1, s2, streckenquadrat(P1, P2)))
+    Ponv <- PL+onv(P2-P1)
     
     
     g <- ggplot()+
@@ -291,6 +523,25 @@ plot_bogenschnitt <- function(
             x=P2[1]+s1*cos(seq(0,2*pi,length.out=100)),
             y=P2[2]+s1*sin(seq(0,2*pi,length.out=100)),
             col="grey")+
+        # PL + orientierter Normalenvektor (P2-P1)°
+        geom_segment(aes(
+            x=PL[1],
+            y=PL[2],
+            xend=Ponv[1],
+            yend=Ponv[2]),
+            arrow=arrow(
+                length=unit(12, "points"),
+                angle=20,
+                type="closed"),
+            col="darkgrey")+
+        # label (P2-P1)°
+        geom_text(aes(x=mean(c(PL[1], Ponv[1])),
+                      y=mean(c(PL[2], Ponv[2]))),
+                  label="(P2-P1)^o",
+                  nudge_x=nudge_x,
+                  hjust=0,
+                  col="grey",
+                  alpha=.67)+
         # P1 to P2 (s3)
         geom_segment(aes(
             x=dat[1,"x"],
