@@ -8,7 +8,7 @@ if (!require(tidyverse)) {
 
 # Hilfsfunktionen
 
-## Rechnet Winkelmass um
+## Rechnet Winkelmaß um
 umrechnenWinkel <- function(
     alpha=0,
     quelle=c("deg", "grad", "gon", "rad"),
@@ -25,7 +25,7 @@ cot <- function(alpha) 1/tan(alpha)
 
 ## Berechnet Winkel aus drei Seiten mithilfe des Kosinussatzes
 ## und gibt ihn in gewünschter Einheit aus
-winkel_kosinus_seiten <- function(s1, s2, s3, angle_unit=c("deg", "grad", "gon", "rad")) {
+winkel_kos_3s <- function(s1, s2, s3, angle_unit=c("deg", "grad", "gon", "rad")) {
     umrechnenWinkel(acos((s1^2-s2^2-s3^2)/(2*s2*s3)), 
                     "rad", 
                     angle_unit)
@@ -33,7 +33,7 @@ winkel_kosinus_seiten <- function(s1, s2, s3, angle_unit=c("deg", "grad", "gon",
 
 ## Berechnet Winkel an Punkt 1 aus drei Punkten mithilfe des Kosinussatzes
 ## und gibt ihn in gewünschter Einheit aus
-winkel_kosinus_punkte <- function(P1, P2, P3, angle_unit=c("deg", "grad", "gon", "rad")) {
+winkel_kos_3P <- function(P1, P2, P3, angle_unit=c("deg", "grad", "gon", "rad")) {
     
     umrechnenWinkel(acos(-1*(skalarprodukt(P1-P3, P2-P1)/(strecke(P3, P1)*strecke(P1, P2)))),
                     "rad",
@@ -42,7 +42,7 @@ winkel_kosinus_punkte <- function(P1, P2, P3, angle_unit=c("deg", "grad", "gon",
 
 ## Berechnet Winkel an Punkt 1 aus drei Punkten mithilfe zweier Skalarprodukte und Kotangens
 ## und gibt ihn in gewünschter Einheit aus
-winkel_kotangens_punkte <- function(P1, P2, P3, angle_unit=c("deg", "grad", "gon", "rad")) {
+winkel_kotan_3P <- function(P1, P2, P3, angle_unit=c("deg", "grad", "gon", "rad")) {
     
     umrechnenWinkel(atan(1/(c(1,-1)*(skalarprodukt(P3-P1, P2-P1)/skalarprodukt(P3-P1, onv(P2-P1))))),
                     "rad",
@@ -63,28 +63,26 @@ onv <- function(directionalVector=c(0,0)) {
 }
 
 ## Berechnet die Laenge der Strecke zwischen zwei gegebenen Punkten P1 und P2
-strecke <- function(
-      P1=c(0,0),
-      P2=c(0,0)) {
+strecke <- function(P1=c(0,0), P2=c(0,0)) {
       
       sqrt(streckenquadrat(P1, P2))
 }
 
 ## Berechnet das Quadrat der Strecke zwischen zwei gegebenen Punkten P1 und P2
-streckenquadrat <- function(
-      P1=c(0,0),
-      P2=c(0,0)) {
+streckenquadrat <- function(P1=c(0,0), P2=c(0,0)) {
       
       (P2[1]-P1[1])^2+(P2[2]-P1[2])^2
 }
 
 ## Berechnet den Streckenparameter t (p/s3) als Funktion von s1, s2, und s3^2
 param_ps3 <- function(s1, s2, s3square) {
+    
     0.5*(1+(s2^2/s3square)-(s1^2/s3square))
 }
 
 ## Berechnet den Streckenparameter u (h/s3) als Funktion von s1, s2, s3^2 und p/s3
 param_hs3 <- function(s2, s3square, ps3) {
+    
     sqrt((s2^2/s3square)-ps3^2)
 }
 
@@ -96,13 +94,52 @@ lotfuss <- function(P1, P2, t) {
 
 # Schnittverhalten (3.3)
 
+### Schnittverhalten von Liniensegmenten
+### Prüft, ob die Strecken P1P2 und P3P4 sich schneiden
+
+schnittverhalten_2s <- function(P1=c(0,0), P2=c(0,0), P3=c(0,0), P4=c(0,0)) {
+    
+    length(unique(c(skalarprodukt(P2-P1, onv(P3-P1))>0,
+                    skalarprodukt(P4-P1, onv(P2-P1))>0,
+                    skalarprodukt(P4-P1, onv(P3-P1))>0,
+                    skalarprodukt(P4-P2, onv(P3-P2))<0)))==1
+}
+
+### Schnittpunkt
+### Bestimmt den Schnittpunkt der Geraden g12 durch P1P2 und g34 durch P3P4
+
+schnittpunkt_2g <- function(P1=c(0,0), P2=c(0,0), P3=c(0,0), P4=c(0,0)) {
+    
+    P1+(skalarprodukt(P3-P1, onv(P4-P3))/skalarprodukt(P2-P1, onv(P4-P3)))*(P2-P1)
+}
+
+### Prüft, ob die Geraden g12 durch P1P2 und g34 durch P3P4 parallel sind.
+parallel_2g <- function(P1=c(0,0), P2=c(0,0), P3=c(0,0), P4=c(0,0)) {
+    
+    skalarprodukt(P2-P1, onv(P4-P3))==0
+}
+
 
 ## Lösung geodätischer Probleme mithilfe orientierter Wegbeschreibung (3.5)
 
 #### Bestimmt die Lage von P3 relativ zu P1 und der Strecke P1P2 aus alpha1 (Polaraufnahme und Vorwaertsschnitt)
-quadrant_P3 <- function(alpha1, angle_unit) {
+quadrant_W <- function(alpha1, angle_unit) {
     if(angle_unit!="rad") alpha1 <- umrechnenWinkel(alpha1, angle_unit, "rad")
     ceiling(alpha1/(pi/2)) 
+    
+    # quadrant 2 und 3: hinter P1 relativ zu P1P2
+    # quadrant 1 und 4: vor P1 relativ zu P1P2
+    # quadrant 1 und 2: kartesisch links von P1P2, geodätisch rechts
+    # quadrant 3 und 4: kartesisch rechts von P1P2, geodätisch links
+    
+}
+
+#### Bestimmt die Lage von P3 relativ zu P1 und der Strecke P1P2 aus den Punktkoordinaten
+quadrant_3P <- function(P1=c(0,0),
+                        P2=c(0,0),
+                        P3=c(0,0)) {
+    
+    4-(skalarprodukt(P3-P1, onv(P2-P1))>0)*2-(skalarprodukt(P3-P1, P1-P2)>0)*1
     
     # quadrant 2 und 3: hinter P1 relativ zu P1P2
     # quadrant 1 und 4: vor P1 relativ zu P1P2

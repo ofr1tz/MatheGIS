@@ -50,7 +50,7 @@ plot_polaraufnahme(P1=P1, P2=P2, alpha1=alpha1, s2=s2, angle_unit=angle_unit, or
 
 ### Lage
 ```{r lage}
-quadrant <- quadrant_P3(alpha1, angle_unit)
+quadrant <- quadrant_W(alpha1, angle_unit)
 ```
 Aus dem Wert des Richtungswinkels $\alpha_1=`r paste0(alpha1, sym)`$ kann geschlossen werden, dass sich $P_3$ im **`r as.character(as.roman(quadrant))`. Quadranten** befindet:
 
