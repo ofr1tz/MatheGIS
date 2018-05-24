@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r gegeben}
 
-# Hier die Parameter der Polaraufnahme einfügen/anpassen:
+# Hier die Parameter des Vorwärtsschnitts einfügen/anpassen:
 
 P1 <- c(176678, 9783668)
 P2 <- c(178956, 9783624)
@@ -59,7 +59,7 @@ Aus dem Wert des Richtungswinkels $\alpha_1=`r paste0(alpha1, sym)`$ kann geschl
 * Im `r if(orientation=="cartesian") "kartesischen" else "geodätischen"` Koordinatensystem liegt $P_3$ `r if(orientation=="cartesian" & quadrant<=2 | orientation=="geodetic" & quadrant>2) "**links**" else "**rechts**"` der Strecke $\overline{P_1 P_2}$.
 
 ### Berechnung
-Die Lösung der Polaraufnahme mittels orientierter Wegbeschreibung hat zunächst folgende Form:
+Die Lösung des Vorwärtsschnitts mittels orientierter Wegbeschreibung hat zunächst folgende Form:
 $$P_3=P_1+\frac{p}{s_3}(P_2-P_1)+\frac{h}{s_3}(P_2-P_1)^{\circ}$$
 Da $\frac{p}{s_3}=\frac{\cot\alpha_1}{\cot\alpha_1+\cot\alpha_2}$ und $\frac{h}{s_3}=\frac{1}{\cot\alpha_1+\cot\alpha_2}$, kann man den Höhenabschnitt $p$, die Höhe $h$ und die Strecke $s_3$ durch Einsetzen aus der Gleichung entfernen und erhält nach Ausklammern:
 $$P_3=P_1+\frac{1}{\cot\alpha_1+\cot\alpha_2}(\cot\alpha_1(P_2-P_1)+(P_2-P_1)^{\circ})$$
@@ -67,7 +67,7 @@ $$P_3=P_1+\frac{1}{\cot\alpha_1+\cot\alpha_2}(\cot\alpha_1(P_2-P_1)+(P_2-P_1)^{\
 
 ### Bestimmung der Koordinaten des Punktes $P_3$
 
-Nun können mittels der Formel für die Polaraufnahme die Koordinaten des Punktes $P_3$ bestimmt werden.
+Nun können mittels der Formel für den Vorwärtsschnitt die Koordinaten des Punktes $P_3$ bestimmt werden.
 
 ```{r vorwaertsschnitt}
 P3 <- vorwaertsschnitt_P3(P1=P1, P2=P2, alpha1=alpha1, alpha2=alpha2, angle_unit=angle_unit)

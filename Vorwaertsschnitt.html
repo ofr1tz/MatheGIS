@@ -126,7 +126,7 @@ $(document).ready(function () {
 
 <div id="aufgabenstellung" class="section level2">
 <h2>Aufgabenstellung</h2>
-<pre class="r"><code># Hier die Parameter der Polaraufnahme einfügen/anpassen:
+<pre class="r"><code># Hier die Parameter des Vorwärtsschnitts einfügen/anpassen:
 
 P1 &lt;- c(176678, 9783668)
 P2 &lt;- c(178956, 9783624)
@@ -159,11 +159,11 @@ orientation &lt;- &quot;cartesian&quot; # Optionen: &quot;geodetic&quot; | &quot
 </div>
 <div id="berechnung" class="section level3">
 <h3>Berechnung</h3>
-<p>Die Lösung der Polaraufnahme mittels orientierter Wegbeschreibung hat zunächst folgende Form: <span class="math display">\[P_3=P_1+\frac{p}{s_3}(P_2-P_1)+\frac{h}{s_3}(P_2-P_1)^{\circ}\]</span> Da <span class="math inline">\(\frac{p}{s_3}=\frac{\cot\alpha_1}{\cot\alpha_1+\cot\alpha_2}\)</span> und <span class="math inline">\(\frac{h}{s_3}=\frac{1}{\cot\alpha_1+\cot\alpha_2}\)</span>, kann man den Höhenabschnitt <span class="math inline">\(p\)</span>, die Höhe <span class="math inline">\(h\)</span> und die Strecke <span class="math inline">\(s_3\)</span> durch Einsetzen aus der Gleichung entfernen und erhält nach Ausklammern: <span class="math display">\[P_3=P_1+\frac{1}{\cot\alpha_1+\cot\alpha_2}(\cot\alpha_1(P_2-P_1)+(P_2-P_1)^{\circ})\]</span></p>
+<p>Die Lösung des Vorwärtsschnitts mittels orientierter Wegbeschreibung hat zunächst folgende Form: <span class="math display">\[P_3=P_1+\frac{p}{s_3}(P_2-P_1)+\frac{h}{s_3}(P_2-P_1)^{\circ}\]</span> Da <span class="math inline">\(\frac{p}{s_3}=\frac{\cot\alpha_1}{\cot\alpha_1+\cot\alpha_2}\)</span> und <span class="math inline">\(\frac{h}{s_3}=\frac{1}{\cot\alpha_1+\cot\alpha_2}\)</span>, kann man den Höhenabschnitt <span class="math inline">\(p\)</span>, die Höhe <span class="math inline">\(h\)</span> und die Strecke <span class="math inline">\(s_3\)</span> durch Einsetzen aus der Gleichung entfernen und erhält nach Ausklammern: <span class="math display">\[P_3=P_1+\frac{1}{\cot\alpha_1+\cot\alpha_2}(\cot\alpha_1(P_2-P_1)+(P_2-P_1)^{\circ})\]</span></p>
 </div>
 <div id="bestimmung-der-koordinaten-des-punktes-p_3" class="section level3">
 <h3>Bestimmung der Koordinaten des Punktes <span class="math inline">\(P_3\)</span></h3>
-<p>Nun können mittels der Formel für die Polaraufnahme die Koordinaten des Punktes <span class="math inline">\(P_3\)</span> bestimmt werden.</p>
+<p>Nun können mittels der Formel für den Vorwärtsschnitt die Koordinaten des Punktes <span class="math inline">\(P_3\)</span> bestimmt werden.</p>
 <pre class="r"><code>P3 &lt;- vorwaertsschnitt_P3(P1=P1, P2=P2, alpha1=alpha1, alpha2=alpha2, angle_unit=angle_unit)</code></pre>
 <p><span class="math display">\[\begin{equation}
 \begin{split}
